@@ -10,7 +10,7 @@ tags = [
 categories = [
     "Csharp",
 ]
-image = "ashkan-forouzani-U1dvzmbA22w-unsplash.jpg"
+image = "featured.jpg"
 +++
 
 Quando uma aplicação, principalmente legada, demostra problemas de performance, a primeira solução que vem na cabeça é paralelismo. Com o paralelismo vem a TPL e consequentemente o método Task.Run. Veja esse método:

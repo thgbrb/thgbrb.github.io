@@ -11,7 +11,7 @@ tags = [
 categories = [
     "Csharp",
 ]
-image = "michael-dziedzic-AsF0Nadbb18-unsplash.jpg"
+image = "featured.jpg"
 +++
 
 ## O problema
