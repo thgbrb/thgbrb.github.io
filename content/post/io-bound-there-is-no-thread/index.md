@@ -2,6 +2,7 @@
 author = "Thiago Borba"
 title = "IO Bound - There is no thread <0>"
 date = "2019-08-11"
+slug = "io-bound-there-is-no-thread"
 description = "Desde a sua versão beta, o .NET suportou chamadas assíncronas, inclusive chamadas de IO Bound. Com a evolução do hardware e a chegada de processadores multicores, o .NET evoluiu e trouxe a TPL, que simplificou o uso de trabalhos de IO Bound."
 tags = [
     "C#",

@@ -1,6 +1,7 @@
 +++
 author = "Thiago Borba"
 title = "Está com dúvida no uso do Task.Run? NÃO USE!"
+slug = "esta-com-duvida-no-uso-do-task-run-nao-use"
 date = "2019-07-03"
 description = "O time .NET acertou a mão quando lançou a TPL (task parallel library) no .NET 4.0, porém, isso tem sido um tiro no pé dos projetos .NET em função da falta de conhecimento dos desenvolvedores sobre a TPL."
 tags = [

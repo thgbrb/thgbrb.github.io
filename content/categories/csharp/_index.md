@@ -2,7 +2,7 @@
 title: "C#"
 description: "Desenvolvimento C#"
 slug: "sharp"
-image: "michael-dziedzic-qDG7XKJLKbs-unsplash.jpg"
+image: "1.jpg"
 style:
     background: "#2a9d8f"
     color: "#fff"
