@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>λ Problem -> Code</title><link>https://thiagoborba.me/</link><description>Recent content on λ Problem -> Code</description><generator>Hugo -- gohugo.io</generator><language>pt-br</language><lastBuildDate>Thu, 15 Jul 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://thiagoborba.me/index.xml" rel="self" type="application/rss+xml"/><item><title>Cachelines e False Sharing</title><link>https://thiagoborba.me/p/cache-line-false-sharing/</link><pubDate>Thu, 15 Jul 2021 00:00:00 +0000</pubDate><guid>https://thiagoborba.me/p/cache-line-false-sharing/</guid><description>&lt;img src="https://thiagoborba.me/p/cache-line-false-sharing/cacheline.png" alt="Featured image of post Cachelines e False Sharing" />&lt;h2 id="cpu-cache">CPU Cache&lt;/h2>
+&lt;p>Os processadores possuem estratégias de caching para manter as próximas instruções a serem executadas e blocos
+de dados a serem manipulados o mais próximo de uma thread, economizando ciclos para buscar dados na memória RAM; busca que no contexto de CPU é extremamente lento.
+O cache de CPU é distribuído em níveis, onde L1 é um cache muito pequeno exclusivo para um core e compartilhado com as suas threads e o L2 é um
+cache um pouco maior compartilhado por um grupo de core.&lt;/p>
+&lt;h3 id="cacheline">Cacheline&lt;/h3>
+&lt;p>O processador busca dados na memória em blocos e não ‘byte’ a ‘byte’. Esses blocos de dados são chamados de cacheline.
+Quando o processador lê um determinado ponto da memória ele busca, a partir desse ponto,
+a quantidade de dados equivalentes ao tamanho da cacheline.
+Em média uma linha de cache possui 64 ‘bytes’, variando de acordo com a arquitetura do processador. Quanto maior o tamanho do cache
+maior é quantidade de linhas, ou seja, menor é quantidade de leituras na memória RAM.&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Processador&lt;/th>
+&lt;th>Cache L1&lt;/th>
+&lt;th>Cache L2&lt;/th>
+&lt;th>Cache L3&lt;/th>
+&lt;th>Lançamento&lt;/th>
+&lt;th>Preço&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>i7-9750H&lt;/td>
+&lt;td>32K&lt;/td>
+&lt;td>256K&lt;/td>
+&lt;td>12M&lt;/td>
+&lt;td>2019&lt;/td>
+&lt;td>~USD 395&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Xeon E5-2620&lt;/td>
+&lt;td>384K&lt;/td>
+&lt;td>1,5M&lt;/td>
+&lt;td>15M&lt;/td>
+&lt;td>2012&lt;/td>
+&lt;td>~USD 410&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;blockquote>
+&lt;p>&lt;strong>Tamanho do cache e cacheline&lt;/strong>&lt;/p>
+&lt;p>Para verificar o tamanho do cache e cacheline em uma máquina com Windows, &lt;a class="link" href="https://docs.microsoft.com/en-us/sysinternals/downloads/coreinfo" target="_blank" rel="noopener"
+>utilize o aplicativo Coreinfo da Sysinternal.&lt;/a>
+&lt;figure style="flex-grow: 181; flex-basis: 436px">
+&lt;a href="https://thiagoborba.me/p/cache-line-false-sharing/coreinfo.png" data-size="714x393">&lt;img src="https://thiagoborba.me/p/cache-line-false-sharing/coreinfo.png"
+srcset="https://thiagoborba.me/p/cache-line-false-sharing/coreinfo_hu18a2c3088e3b2475fdfade1ceb23abdb_47125_480x0_resize_box_2.png 480w, https://thiagoborba.me/p/cache-line-false-sharing/coreinfo_hu18a2c3088e3b2475fdfade1ceb23abdb_47125_1024x0_resize_box_2.png 1024w"
+width="714"
+height="393"
+loading="lazy"
+alt="Execução do Coreinfo">
+&lt;/a>
+&lt;figcaption>Execução do Coreinfo&lt;/figcaption>
+&lt;/figure>&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="cache-coherence-protocol">Cache coherence protocol&lt;/h3>
+&lt;p>As CPUs modernas na sua maioria possuem mais de uma thread por core, utilizando técnicas de programação paralela.
+Uma das estratégias é utilizar as micropausas de uma thread física (ex.: buscar dados na memória RAM) para que outra thread
+execute alguma operação.&lt;/p>
+&lt;blockquote>
+&lt;p>Tecnologia proprietária&lt;/p>
+&lt;p>Cada fornecedor define a sua tecnologia para maximizar o desempenho de um processador.&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://www.intel.com.br/content/www/br/pt/gaming/resources/hyper-threading.html" target="_blank" rel="noopener"
+>Intel Hyper-thread&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://www.amd.com/" target="_blank" rel="noopener"
+>AMD Simultaneous Multithreading&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;p>As threads físicas compartilham o cache L1 exclusivo do seu core, assim como o cache L2, que é compartilhado por um grupo de core e outros
+níveis de cache possam existir. Por fim, acima dessa estrutura de cache, existe a memória RAM.&lt;/p>
+&lt;figure>&lt;img src="800px-Non_Coherent.gif" width="500"/>&lt;figcaption>
+&lt;h4>Uso de cache sem coerência/integridade (fig wikipédia)&lt;/h4>
+&lt;/figcaption>
+&lt;/figure>
+&lt;p>Dado o cenário de paralelismo, a CPU deve implementar estratégias de sincronização desses dados para evitar o problema demonstrado na imagem acima.
+Essa estratégia é chamada de &lt;strong>Cache coherence protocol&lt;/strong>. Esse protocolo é responsável por manter a coerência e integridade no cache.&lt;/p>
+&lt;figure>&lt;img src="800px-Coherent.gif" width="500"/>&lt;figcaption>
+&lt;h4>Estratégia de coerência (fig wikipédia)&lt;/h4>
+&lt;/figcaption>
+&lt;/figure>
+&lt;h3 id="otimização-de-compiladores">Otimização de compiladores&lt;/h3>
+&lt;p>Os compiladores modernos além gerarem códigos que utilizam os recursos fornecidos pelas CPUs também implementam estratégias e técnicas
+de otimização, com o objetivo de extrair o máximo do hardware. Porém, nem sempre os compiladores conseguem gerar o código mais performático
+por uma série de motivos, que sozinhos são tema de um futuro post.
+Dificilmente esses problemas são detectados nos processos de desenvolvimento e/ou qualidade. Não é incomum que eles ocorram somente em
+produção de forma não determinística.&lt;/p>
+&lt;h2 id="false-sharing">False sharing&lt;/h2>
+&lt;p>Em algumas situações o código de um programador não consegue ser otimizado pelo compilador, o que introduz problemas
+de desempenho ou até mesmo falhas. Uma dessas situações é o &lt;strong>false sharing&lt;/strong>. O false sharing ocorre quando o &lt;strong>cache coherence protocol&lt;/strong>
+entende ser necessário atualizar uma determinada linha de cache, fazendo com que ocorra uma nova leitura do dado na memória RAM.
+&lt;em>Lembrando que leitura de memória RAM num contexto de CPU é uma operação lenta!&lt;/em>&lt;/p>
+&lt;p>Quando threads físicas fazem &lt;strong>leituras&lt;/strong> e &lt;strong>gravações&lt;/strong> &lt;strong>frequentes&lt;/strong> de um &lt;strong>dado&lt;/strong> muito &lt;strong>pequeno&lt;/strong> que estão alinhados na memória RAM num cenário de &lt;strong>paralelismo&lt;/strong>
+essa situação ocorrerá.&lt;/p>
+&lt;p>Nos exemplos abaixo temos um código cujo objetivo é para cada posição de um array de inteiros incrementar o valor da referência num ‘looping for’ 1.000.000 de vezes.&lt;/p>
+&lt;blockquote>
+&lt;p>Foi utilizado um laptop com um processador i7-9750H para os testes.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="cenário-a---false-sharing">Cenário A - False sharing&lt;/h3>
+&lt;p>&lt;strong>17,435&lt;/strong> segundos para finalizar o processamento.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-csharp" data-lang="csharp">&lt;span class="k">private&lt;/span> &lt;span class="k">readonly&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">[]&lt;/span> &lt;span class="n">sharedArray&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="m">4&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;span class="k">public&lt;/span> &lt;span class="k">void&lt;/span> &lt;span class="n">CenarioA&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;span class="p">{&lt;/span>
+&lt;span class="kt">var&lt;/span> &lt;span class="n">task1&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">0&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;span class="kt">var&lt;/span> &lt;span class="n">task2&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;span class="kt">var&lt;/span> &lt;span class="n">task3&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;span class="kt">var&lt;/span> &lt;span class="n">task4&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">3&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">WaitAll&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">task1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">task2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">task3&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">task4&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="k">private&lt;/span> &lt;span class="k">void&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">position&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">{&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">var&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="m">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="m">1_000_000&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="p">++)&lt;/span>
+&lt;span class="n">sharedArray&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">position&lt;/span>&lt;span class="p">]++;&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="cenário-b---otimização-de-código">Cenário B - Otimização de código&lt;/h3>
+&lt;p>&lt;strong>5,72&lt;/strong> segundos para finalizar o processamento.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-csharp" data-lang="csharp">&lt;span class="k">private&lt;/span> &lt;span class="k">readonly&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">[]&lt;/span> &lt;span class="n">sharedArray&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="m">64&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;span class="k">public&lt;/span> &lt;span class="k">void&lt;/span> &lt;span class="n">CenarioB&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;span class="p">{&lt;/span>
+&lt;span class="kt">var&lt;/span> &lt;span class="n">task1&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">0&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;span class="kt">var&lt;/span> &lt;span class="n">task2&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">16&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;span class="kt">var&lt;/span> &lt;span class="n">task3&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">32&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;span class="kt">var&lt;/span> &lt;span class="n">task4&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">48&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">WaitAll&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">task1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">task2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">task3&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">task4&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="k">private&lt;/span> &lt;span class="k">void&lt;/span> &lt;span class="n">Inc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">position&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">{&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">var&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="m">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="m">1_000_000&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="p">++)&lt;/span>
+&lt;span class="n">sharedArray&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">position&lt;/span>&lt;span class="p">]++;&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="benchmark-cenários-a-e-b">Benchmark Cenários A e B&lt;/h3>
+&lt;p>No benchmark observamos que o Cenário B executou aproximadamente 3x mais rápido que o cenário A.&lt;/p>
+&lt;p>&lt;figure style="flex-grow: 482; flex-basis: 1158px">
+&lt;a href="https://thiagoborba.me/p/cache-line-false-sharing/benchmark.png" data-size="449x93">&lt;img src="https://thiagoborba.me/p/cache-line-false-sharing/benchmark.png"
+srcset="https://thiagoborba.me/p/cache-line-false-sharing/benchmark_huab14249e0062ed53f61850b823ec8abb_8986_480x0_resize_box_2.png 480w, https://thiagoborba.me/p/cache-line-false-sharing/benchmark_huab14249e0062ed53f61850b823ec8abb_8986_1024x0_resize_box_2.png 1024w"
+width="449"
+height="93"
+loading="lazy"
+alt="Benchmark A x B">
+&lt;/a>
+&lt;figcaption>Benchmark A x B&lt;/figcaption>
+&lt;/figure>&lt;/p>
+&lt;p>No CenárioA todas as threads compartilham a mesma cacheline para leitura e gravação. Isso faz o cache coherence protocol
+invalidar diversas vezes a cacheline e consequentemente a CPU deve buscar na memória RAM o valor atualizado.
+Já no CenárioB utilizamos uma estratégia onde cada thread utiliza uma cacheline diferente! Para fazer isso é utilizado
+saltos de 16 posições no array de inteiro, ou seja:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Quantidade de Int32&lt;/th>
+&lt;th>Tamanho Int32&lt;/th>
+&lt;th>Tamanho ocupado&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>16&lt;/td>
+&lt;td>4 bytes&lt;/td>
+&lt;td>16 x 4 bytes = 64 bytes&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Considerando que o processador onde o benchmark é executado possui uma cacheline de 64 ‘bytes’, cada thread utilizará uma
+cacheline diferente.&lt;/p>
+&lt;h2 id="conclusão">Conclusão&lt;/h2>
+&lt;p>Apesar dos compiladores ocultarem parte da complexidade da programação paralela há cenários que precisam da intervenção do programador.
+Entender como funciona alocação de memória na sua stack de desenvolvimento assim como conhecer o funcionamento de componentes de hardware
+são ferramentas essenciais para a escrita de códigos de alto desempenho e otimizados.&lt;/p>
+&lt;blockquote>
+&lt;p>👉 Dica ☠️&lt;/p>
+&lt;p>Otimização prematura do código traz complexidade sem agregar valor! Evite :)&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>🤯 &lt;strong>Informação&lt;/strong>&lt;/p>
+&lt;p>False sharing é um problema universal em processadores multithreading que compartilham cache.
+O exemplo acima funciona em qualquer linguagem :)&lt;/p>
+&lt;/blockquote></description></item><item><title>Boas práticas em commits</title><link>https://thiagoborba.me/p/boas-praticas-em-commits/</link><pubDate>Thu, 08 Jul 2021 00:00:00 +0000</pubDate><guid>https://thiagoborba.me/p/boas-praticas-em-commits/</guid><description>&lt;img src="https://thiagoborba.me/p/boas-praticas-em-commits/featured.jpg" alt="Featured image of post Boas práticas em commits" />&lt;p>Durante um apoio a projeto me deparei com o seguinte cenário quando acessei git log:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">391a8dad Elaboração dos contadores de performance para os comando da Api Pedidos
+fdde9224 Merge branch &amp;#39;release/v8.0.3&amp;#39; of https://dev.azure.com/XXXXXXXXXXXXXX/v8.0.3
+3c2b525f publicações
+a3cb5825 merge apresentação da url do boleto com o desconto do cupom frete enviado ao ax
+f9852c90 ajuste para mandar o valor de desconto do cupom tipo frete correto ao ax
+64785991 Pedidos: Exibindo o link do Pdf no nó de boleto de cobrança + XXXXXX.Produtos: ajuste no nome de um dos eventos do contador de performance + XXXXXX.YYYYYYYY: exibição do link do Pdf do boleto
+c9c79c0d publicaçoes
+07570cf7 CatalogoDeProdutos: CatalogoDeProdutosPerformanceMonitor herda a interface IPerformanceMonitor
+f113e074 Conflict resolution
+424246b0 Update azure-pipelines-unit.yml for Azure Pipelines
+d0e870bd Update azure-pipelines-unit.yml for Azure Pipelines
+8c5255d2 Update azure-pipelines-unit.yml for Azure Pipelines
+7fdf5e97 Update azure-pipelines-unit.yml for Azure Pipelines
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>A situação do histórico era tão caótica que era quase impossível entender qual o propósito de um commit,
+tornando inútil a sua descrição. A história daquele fonte estava muito mal contada e é aí que está o problema.
+Quando era necessário entender a implementação de uma regra de negócio ou o que motivou as alterações no código não existia contexto,
+não existia história.
+Uma sequência de commits com o mesmo título &amp;ldquo;Update azure-pipelines-unit.yml for Azure Pipelines&amp;rdquo; não deixa claro o motivo da alteração.
+Apenas sabemos que ocorreu uma sequência de alterações em um arquivo.&lt;/p>
+&lt;p>A falta de relação do commit com uma issue em uma ferramenta ALM contribuía para a falta de contexto. Em algumas situações
+era necessário recorrer ao time de negócio para resgatar o histórico que motivou a alteração de uma regra de negócio.&lt;/p>
+&lt;blockquote>
+&lt;p>Os commits em um repositório git contam uma história, a história de vida de um código. Eles descrevem o que motivou a fazer
+as alterações que foram feitas de uma forma muito clara, mantendo o histórico e apoiando os futuros desenvolvedores.&lt;/p>
+&lt;/blockquote>
+&lt;p>Um commit bem escrito é dividido em duas partes, o assunto com no máximo 50 caracteres e que de forma imperativa expressa
+a sua intenção e um body que descreve o porquê do commit. Um bom commit também faz referência ou está vinculado a uma issue
+que contextualiza o commit. No exemplo abaixo, é possível verificar algumas boas práticas na escrita de commits aplicadas no
+repositório do Erlang.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">21b7ad04ce Clarify the asynchronousness of signal reception
+5b762b79a4 erts: Document hibernate resume function must be exported
+18e9843e44 Improve receive docs
+410b279d41 erts: Fix super alignment in etp-commands
+f0ae5f12d6 erts: Short circuit immediates in match spec compiler
+220a46789e erts: Micro optimize arityval -&amp;gt; make_arityval
+f12067111a erts: Silence harmless compiler warnings
+68cfb519ca erts: Optimize erts_qsort_partion_array
+e01cfccd2f crypto: Test generated EC private key length
+18fa73579d dialyzer: Do not expose line number 0 in message locations
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>O projeto Erlang possui uma qualidade alta na escrita de seus commits. No exemplo abaixo o assunto demonstra a intenção e
+no body o porquê.&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/erlang/otp/commit/a65d0d571c13d632eed9b0a6b61052c1b4b758bb" target="_blank" rel="noopener"
+>Exemplo de um commit com boas práticas&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">Don&amp;#39;t keep a stacktrace longer than necessary
+After an exception had been caught, the stacktrace (`p-&amp;gt;ftrace`) would
+be retained in the process until another exception occurred.
+While at it, also clear the exception term (`p-&amp;gt;fvalue`) in the common
+error handling code instead of in the code for `try_case` in each module
+&lt;/code>&lt;/pre>&lt;/div>&lt;/blockquote>
+&lt;h2 id="guia-de-boas-práticas">Guia de Boas Práticas&lt;/h2>
+&lt;p>Mais do que uma simples descrição, as boas práticas na escrita de commit servem para apoiar o processo de revisão,
+contribuir para um release notes rico e ajudar os futuros desenvolvedores.&lt;/p>
+&lt;ul>
+&lt;li>O commit é composto por um &lt;strong>assunto&lt;/strong> e um &lt;strong>body&lt;/strong> &lt;!-- raw HTML omitted -->&lt;em>opcional&lt;/em>&lt;!-- raw HTML omitted -->.&lt;/li>
+&lt;li>Sempre mantenha uma linha em branco entre o assunto e body quando existir um.&lt;/li>
+&lt;li>Não utilize ponto final no final do assunto.&lt;/li>
+&lt;li>Mantenha o assunto com no máximo 50 caracteres.&lt;/li>
+&lt;li>Utilize o body para &lt;strong>explicar&lt;/strong> o que foi feito ao invés de &lt;strong>como&lt;/strong> foi feito.&lt;/li>
+&lt;li>Dê preferência para uma linguagem imperativa no assunto.&lt;/li>
+&lt;li>Relacione as issues no final do body.&lt;/li>
+&lt;li>Conheça o git (squash é um excelente exemplo).&lt;/li>
+&lt;li>Respeite os padrões acordados com o time.&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>&lt;a class="link" href="https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project" target="_blank" rel="noopener"
+>Para mais informações acesse o git book.&lt;/a>&lt;/p>
+&lt;/blockquote></description></item><item><title>IO Bound - There is no thread &lt;0></title><link>https://thiagoborba.me/p/io-bound-there-is-no-thread/</link><pubDate>Sun, 11 Aug 2019 00:00:00 +0000</pubDate><guid>https://thiagoborba.me/p/io-bound-there-is-no-thread/</guid><description>&lt;img src="https://thiagoborba.me/p/io-bound-there-is-no-thread/featured.jpg" alt="Featured image of post IO Bound - There is no thread &lt;0>" />&lt;h2 id="o-problema">O problema&lt;/h2>
+&lt;p>&lt;strong>Quem nunca ouviu alguma dessas frases:&lt;/strong>&lt;/p>
+&lt;pre>&lt;code>&amp;quot;...sua aplicação deve ser assíncrona...&amp;quot;,
+&amp;quot;...se está lento muda o método para async...&amp;quot;,
+&amp;quot;...todos os métodos da API devem ser assíncronos...&amp;quot;,
+&amp;quot;...usa async para tentar resolver o problema de lentidão&amp;quot;,
+&amp;quot;Eu li num blog que aplicações modernas em C# devem ser async/await...&amp;quot;.
+&lt;/code>&lt;/pre>
+&lt;p>No final de tudo, encontramos esse tipo de código na aplicação:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-csharp" data-lang="csharp">&lt;span class="k">public&lt;/span> &lt;span class="k">static&lt;/span> &lt;span class="n">Task&lt;/span> &lt;span class="n">DoRequest&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">string&lt;/span> &lt;span class="n">url&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">async&lt;/span> &lt;span class="p">()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span>
+&lt;span class="p">{&lt;/span>
+&lt;span class="k">await&lt;/span> &lt;span class="n">httpClient&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">GetStringAsync&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">requestUri&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">url&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">Console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">WriteLine&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">$&amp;#34;{DateTime.Now} - Task completed.&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">});&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="io-bound--cpu-bound">IO Bound &amp;amp; CPU Bound&lt;/h2>
+&lt;p>Dentro da computação, IO Bound refere-se a cargas de trabalho de IO (disco, redes, dispositivos) e CPU Bound às cargas de trabalho de CPU (algoritmos, cálculos).&lt;/p>
+&lt;h2 id="microsoft-windows-e-io-bound">Microsoft Windows e IO Bound&lt;/h2>
+&lt;p>Conceitualmente, toda a carga de trabalho de uma aplicação é executada por uma thread. Essa thread possui uma fatia de tempo (time slice) de uso do processador.&lt;/p>
+&lt;p>&lt;strong>Agora, se aplicação faz o acesso a um IO, porque deve existir uma thread?&lt;/strong>&lt;/p>
+&lt;p>De fato, não faz sentido. Por esse motivo o Windows, em sua natureza assíncrona, trata esse cenário de IO Bound. Toda chamada para o Windows, mesmo que síncrona, será tratada como assíncrona.
+Quando o .NET acessa um recurso de IO, ele cria uma IOCP (IO Completation Port) vinculada ao chamador. O .NET utiliza as IOCP para gerenciar as solicitações de IO realizadas pela aplicação. Na sequencia o .NET faz acesso a API Win32, cria um IRP (IO Request Packet) e adiciona-o na fila do dispositivo.
+O IRP faz parte da arquitetura do Windows, e é utilizado para comunicação com dispositivos. Nessa arquitetura, é utilizado uma fila IRP para o dispositivo, que retira o pacote da fila, processa o trabalho e devolve o resultado.&lt;/p>
+&lt;p>Observe que nesse processo, não há thread envolvida. É puramente IO!&lt;/p>
+&lt;p>&lt;figure style="flex-grow: 144; flex-basis: 346px">
+&lt;a href="https://thiagoborba.me/p/io-bound-there-is-no-thread/clrviacsharp.png" data-size="1804x1249">&lt;img src="https://thiagoborba.me/p/io-bound-there-is-no-thread/clrviacsharp.png"
+srcset="https://thiagoborba.me/p/io-bound-there-is-no-thread/clrviacsharp_hu6b3628b0c23982393f562976f4ae79a4_1049135_480x0_resize_box_2.png 480w, https://thiagoborba.me/p/io-bound-there-is-no-thread/clrviacsharp_hu6b3628b0c23982393f562976f4ae79a4_1049135_1024x0_resize_box_2.png 1024w"
+width="1804"
+height="1249"
+loading="lazy"
+alt="CLR via C# por Jeffrey Richter">
+&lt;/a>
+&lt;figcaption>CLR via C# por Jeffrey Richter&lt;/figcaption>
+&lt;/figure>&lt;/p>
+&lt;p>Uma vez que o trabalho é concluído, o dispositivo faz uma chamada de interrupção de sistema e devolve o resultado. Quando isso acontece, a API Win32 irá obter o resultado do trabalho e notificará o .NET através da IOCP criada na requisição. Nesse momento, o .NET irá obter uma thread do ThreadPool e devolverá o resultado para o chamador.&lt;/p>
+&lt;h2 id="net-e-io-bound">.NET e IO Bound&lt;/h2>
+&lt;p>Uma vez que entendemos essa arquitetura, fica claro porque as chamadas assíncronas precisam ser &lt;strong>&amp;ldquo;async all the way&amp;rdquo;&lt;/strong> e principalmente, porque não há threads em IO Bound.&lt;/p>
+&lt;p>Quando olhamos novamente o código, fica claro porque ele não faz sentido.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-csharp" data-lang="csharp">&lt;span class="k">public&lt;/span> &lt;span class="k">static&lt;/span> &lt;span class="n">Task&lt;/span> &lt;span class="n">DoRequest&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">string&lt;/span> &lt;span class="n">url&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">async&lt;/span> &lt;span class="p">()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span>
+&lt;span class="p">{&lt;/span>
+&lt;span class="k">await&lt;/span> &lt;span class="n">httpClient&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">GetStringAsync&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">requestUri&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">url&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">Console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">WriteLine&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">$&amp;#34;{DateTime.Now} - Task completed.&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">});&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Como essa chamada é síncrona, o httpclient manterá a thread bloqueada até finalizar o request, ou seja, nesse código estamos alocando uma Task e sua estrutura de máquina de estado para aguardar uma thread que sabemos que ficará bloqueada. Neste caso, onde a chamada é síncrona, e há somente métodos assíncronos disponíveis na API, então usamos .Result.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-csharp" data-lang="csharp">&lt;span class="k">public&lt;/span> &lt;span class="k">static&lt;/span> &lt;span class="k">void&lt;/span> &lt;span class="n">DoRequest&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">string&lt;/span> &lt;span class="n">url&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">{&lt;/span>
+&lt;span class="n">httpClient&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">GetStringAsync&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">requestUri&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">url&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="n">Result&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">Console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">WriteLine&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">$&amp;#34;{DateTime.Now} - Task completed.&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">};&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Para utilizar chamadas assíncronas em .NET é necessário que:&lt;/p>
+&lt;ul>
+&lt;li>Chamada seja &amp;ldquo;async all the way&amp;rdquo;&lt;/li>
+&lt;li>Lib de acesso ao recurso implemente &amp;ldquo;async all the way&amp;rdquo;&lt;/li>
+&lt;/ul>
+&lt;p>Se qualquer uma dessas condições não for atendida, o seu código estará bloqueando uma thread para cargas de trabalho IO Bound.&lt;/p>
+&lt;h2 id="demostração-do-impacto-do-io-bound">Demostração do Impacto do IO Bound&lt;/h2>
+&lt;p>Para materializar a importância do IO Bound na aplicação e o seu impacto, vamos analisar a PoC abaixo.&lt;/p>
+&lt;ul>
+&lt;li>TimeApi
+&lt;ul>
+&lt;li>O TimeApi é uma API Rest em .NET Core que possui um método GET que retorna um DateTime atual. Antes de retornar o DateTime ele uso um delay aleatório de 10s até 20s a fim de simular uma API com problemas de performance.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Portal
+&lt;ul>
+&lt;li>O Portal é uma aplicação ASPNET Core que possui 3 actions, sendo a Index (faz uma chamada síncrona para TimeApi), a IndexAsync (faz uma chamada assíncrona para TimeApi) e a Information (retorna a quantidade de threads disponíveis na aplicação). A aplicação Portal possui uma restrição de threads disponíveis, limitada ao número de cores do processador da máquina da demostração (8 cores). Isso é utilizado para simular um servidor com alta carga de trabalho e poucas threads disponíveis.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Requester
+&lt;ul>
+&lt;li>O Requester é uma aplicação console em .NET Core que faz chamadas síncronas e assíncronas para o Portal.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;figure style="flex-grow: 184; flex-basis: 442px">
+&lt;a href="https://thiagoborba.me/p/io-bound-there-is-no-thread/BlockingThread.gif" data-size="1293x701">&lt;img src="https://thiagoborba.me/p/io-bound-there-is-no-thread/BlockingThread.gif"
+srcset="https://thiagoborba.me/p/io-bound-there-is-no-thread/BlockingThread_hu9d2c2561095b4a8f77b258c555b4d228_1348985_480x0_resize_box.gif 480w, https://thiagoborba.me/p/io-bound-there-is-no-thread/BlockingThread_hu9d2c2561095b4a8f77b258c555b4d228_1348985_1024x0_resize_box.gif 1024w"
+width="1293"
+height="701"
+loading="lazy"
+alt="IO Blocking Threads">
+&lt;/a>
+&lt;figcaption>IO Blocking Threads&lt;/figcaption>
+&lt;/figure>&lt;/p>
+&lt;p>Na chamada síncrona, bloqueamos uma thread, que fica aguardando finalizar a carga de trabalho IO.&lt;/p>
+&lt;p>&lt;figure style="flex-grow: 184; flex-basis: 442px">
+&lt;a href="https://thiagoborba.me/p/io-bound-there-is-no-thread/NoBlockingThread.gif" data-size="1293x701">&lt;img src="https://thiagoborba.me/p/io-bound-there-is-no-thread/NoBlockingThread.gif"
+srcset="https://thiagoborba.me/p/io-bound-there-is-no-thread/NoBlockingThread_hu42a47fc0bd9a907194fd9ca4aaf7af35_714802_480x0_resize_box.gif 480w, https://thiagoborba.me/p/io-bound-there-is-no-thread/NoBlockingThread_hu42a47fc0bd9a907194fd9ca4aaf7af35_714802_1024x0_resize_box.gif 1024w"
+width="1293"
+height="701"
+loading="lazy"
+alt="I/O No blocking Threads">
+&lt;/a>
+&lt;figcaption>I/O No blocking Threads&lt;/figcaption>
+&lt;/figure>&lt;/p>
+&lt;p>Já na chamada assíncrona, com o &amp;ldquo;async all the way&amp;rdquo;, as threads não são bloqueadas. Assim que invocamos o HttpClient, ele segue o fluxo de processamento assíncrono que vimos acima e libera a thread do request para retornar ao Threadpool. Desta forma, mesmo que a TimeApi apresente algum problema de performance, a aplicação Portal fica disponível para receber novos requests.&lt;/p>
+&lt;h2 id="custo-da-programação-assíncrona">Custo da programação Assíncrona&lt;/h2>
+&lt;p>Quando uma aplicação apresenta lentidão, a resposta default, na maioria dos casos é &amp;ldquo;&amp;hellip; precisamos de mais hardware.&amp;rdquo;. De fato, o aumento do hardware minimiza os problemas de performance, mas à um alto custo financeiro. Na demonstração, onde simulamos um ambiente com hardware limitado e/ou carga alta de trabalho e com uma API problemática, observamos que utilizando as chamadas assíncronas corretamente, fomos capazes de atender 305 requisições!
+Comparando com o total de requisições síncronas obtidas, que foram 14, significa que a aplicação assíncrona foi 22x mais eficiente no uso do hardware.&lt;/p>
+&lt;p>Se considerarmos que nesse cenário hipotético, a aplicação deve atender até 305 requests, concluimos que:&lt;/p>
+&lt;ul>
+&lt;li>Na versão síncrona precisaríamos de 14 servidores;&lt;/li>
+&lt;li>Na versão assíncrona, os 14 servidores da versão síncrona poderiam ser reduzidos para 1 único servidor.&lt;/li>
+&lt;/ul>
+&lt;p>Considerando o custo de um servidor físico de BRL 12.000, concluimos que:&lt;/p>
+&lt;ul>
+&lt;li>O custo de infraestrutura para versão síncrona seria de BRL 168.000;&lt;/li>
+&lt;li>O custo de infraestrutura para versão assíncrona seria de BRL 12.000.&lt;/li>
+&lt;/ul>
+&lt;h2 id="reflexão">Reflexão&lt;/h2>
+&lt;p>Mais do que um software funcional, é necessário que ele seja eficiente e responsável. Devemos conhecer como o Framework que trabalhamos funciona. Devemos aprender a escrever código que aproveite o máximo possível o hardware disponível.&lt;/p>
+&lt;p>&lt;a class="link" href="https://github.com/thgbrb/ThereIsNoThread" target="_blank" rel="noopener"
+>Os fontes utilizados nesse artigo, estão disponíveis no Github.&lt;/a>&lt;/p></description></item><item><title>Está com dúvida no uso do Task.Run? NÃO USE!</title><link>https://thiagoborba.me/p/esta-com-duvida-no-uso-do-task-run-nao-use/</link><pubDate>Wed, 03 Jul 2019 00:00:00 +0000</pubDate><guid>https://thiagoborba.me/p/esta-com-duvida-no-uso-do-task-run-nao-use/</guid><description>&lt;img src="https://thiagoborba.me/p/esta-com-duvida-no-uso-do-task-run-nao-use/featured.jpg" alt="Featured image of post Está com dúvida no uso do Task.Run? NÃO USE!" />&lt;p>Quando uma aplicação, principalmente legada, demostra problemas de performance, a primeira solução que vem na cabeça é paralelismo. Com o paralelismo vem a TPL e consequentemente o método Task.Run. Veja esse método:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-csharp" data-lang="csharp">&lt;span class="k">public&lt;/span> &lt;span class="k">static&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">List&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="n">InsulinDosageComplement&lt;/span>&lt;span class="p">&amp;gt;&amp;gt;&lt;/span> &lt;span class="n">GetAllAsync&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;span class="p">{&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">Task&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Run&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="n">InsulinDosageComplementWrapper&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="n">GetAll&lt;/span>&lt;span class="p">());&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Esse é o erro mais comum na utilização da TPL. O que esse método faz é criar uma nova Task. Não há mágica, é isso! O método que é passado como parâmetro do método Run será executado em uma thread existente ou uma nova thread será criada.&lt;/p>
+&lt;p>Se considerarmos a chamada desse método em qualquer que seja o contexto, esse método irá consumir uma thread sem necessidade. O mais curioso é que o código que consome o método acima não utiliza await, ele utiliza .Result, ou seja, a thread do request fica bloqueada aguardando uma outra thread processar a chamada.&lt;/p>
+&lt;p>Certamente Task.Run não é a solução para problemas de performance se não for bem utilizada. Por isso, se você estiver pensando em utilizar Task.Run e está com dúvida, Não use!&lt;/p></description></item></channel></rss>
