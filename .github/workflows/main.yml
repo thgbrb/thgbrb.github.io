@@ -1,0 +1,44 @@
+name: github pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Install Hugo
+        run: |
+          sudo apt-get install build-essential procps curl file
+          brew install hugo
+          hugo version
+
+      - name: Build static site
+        run: hugo --minify
+
+      - name: Commit do build para repo gh-pages
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          shopt -s extglob
+          rm -dfR !(public|CNAME)
+          mv -f public/* .
+          rm -dfR public/
+          git branch gh-pages
+          git add -f .
+          git commit -m "Atualização github pages"
+      - name: Push do build para repo gh-pages
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          force: true

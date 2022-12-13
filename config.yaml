@@ -1,0 +1,154 @@
+baseurl: https://thiagoborba.me
+languageCode: pt-br
+theme: hugo-theme-stack
+paginate: 5
+title: λ Problem -> Code
+
+# Change it to your Disqus shortname before using
+disqusShortname: thiagoborba-me
+
+# GA Tracking ID
+googleAnalytics: UA-145438397-1
+
+# Theme i18n support
+# Available values: en, fr, id, ja, ko, pt-br, zh-cn, es, de, nl
+DefaultContentLanguage: pt-br   
+
+permalinks:
+    post: /p/:slug/
+    page: /:slug/
+
+params:
+    mainSections:
+        - post
+    featuredImageField: image
+    rssFullContent: true
+    favicon: code
+
+    footer:
+        since: 2017
+        customText:
+
+    dateFormat:
+        published: 02/Jan/2006
+        lastUpdated: 02/Jan/2006
+
+    sidebar:
+        emoji: λ
+        subtitle: Coding, Performance, Arquitetura de Software
+        avatar:
+            local: true
+            src: img/arq5avatar.jpg
+
+    article:
+        math: true
+        toc: true
+        license:
+            enabled: false
+            default: Licensed under CC BY-NC-SA 4.0
+
+    comments:
+        enabled: true
+        provider: disqus
+
+        utterances:
+            repo:
+            issueTerm: pathname
+            label:
+
+        remark42:
+            host:
+            site:
+            locale:
+
+        vssue:
+            platform:
+            owner:
+            repo:
+            clientId:
+            clientSecret:
+
+        # Waline client configuration see: https://waline.js.org/en/reference/client.html
+        waline:
+            serverURL:
+            lang:
+            visitor:
+            avatar:
+            emoji:
+                - https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo
+            requiredMeta:
+                - name
+                - email
+                - url
+            placeholder:
+            locale:
+                admin: Admin
+
+    widgets:
+        enabled:
+            - search
+            - archives
+            - tag-cloud
+
+        archives:
+            limit: 5
+
+        tagCloud:
+            limit: 10
+
+    opengraph:
+        twitter:
+            # Your Twitter username
+            site: thiagoborbame
+
+            # Available values: summary, summary_large_image
+            card: summary_large_image
+
+    defaultImage:
+        opengraph:
+            enabled: false
+            local: false
+            src:
+
+    colorScheme:
+        # Display toggle
+        toggle: true
+
+        # Available values: auto, light, dark
+        default: auto
+
+    imageProcessing:
+        cover:
+            enabled: true
+        content:
+            enabled: true
+
+menu:
+    main:
+        - identifier: home
+          name: Home
+          url: /
+          weight: -100
+          pre: home
+
+related:
+    includeNewer: true
+    threshold: 60
+    toLower: false
+    indices:
+        - name: tags
+          weight: 100
+
+        - name: categories
+          weight: 200
+
+markup:
+    tableOfContents:
+        endLevel: 4
+        ordered: true
+        startLevel: 2
+    highlight:
+        noClasses: false
+    goldmark:
+        renderer:
+            unsafe: true
