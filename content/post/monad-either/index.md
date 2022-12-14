@@ -117,7 +117,7 @@ public class Either<TL, TR>
     }
 ```
 
-O método Match verifica se o objeto da esquerda está marcado. Se estiver marcado invoca a função da esqueda, senão a função da direita.
+O método Match verifica se o objeto da esquerda está marcado. Se estiver marcado invoca a função da esquerda, senão a função da direita.
 ```csharp
 public T Match<T>(Func<TL, T> leftFunction, Func<TR, T> rightFunction)
     => _isLeft ? leftFunction(_left) : rightFunction(_right);
