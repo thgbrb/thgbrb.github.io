@@ -52,8 +52,8 @@ O retorno também muda, retornando o objeto IPHostEntry e não mais uma string c
 public Task<IPHostEntry> ElidingGetHostNameEntryAsync(string hostname)
 ```
 
-## Trade-off
-Como toda técnica de otimização, existem trade-off entre **legibilidade** e **manutenibilidade** de código e performance.
+## Trade-offs
+Como toda técnica de otimização, existem trade-offs entre **legibilidade** e **manutenibilidade** de código e performance.
 A técnica de eliding otimiza alocação de memória. O impacto ocorre no stacktrace de expcetions * e responsabilidade única.
 
 ### Benefício: Alocação de memória
@@ -199,7 +199,7 @@ namespace Benchmark
 ```
 
 ## Conclusão
-Como toda técnica de otimização, existem trade-off. O principal impacto da técnica de eliding task é a possível quebra de responsabilidades, com a transferência do tratamento do retorno para uma camada diferente da camada onde a chamada IO bound foi realizada. Antes de utilizar essa técnica, é essencial que sejam feitas medições e exista evidências que justifiquem o seu uso.
+Como toda técnica de otimização, existem trade-offs. O principal impacto da técnica de eliding task é a possível quebra de responsabilidades, com a transferência do tratamento do retorno para uma camada diferente da camada onde a chamada IO bound foi realizada. Antes de utilizar essa técnica, é essencial que sejam feitas medições e exista evidências que justifiquem o seu uso.
 
 > 👉 Dica ☠️
 > 
