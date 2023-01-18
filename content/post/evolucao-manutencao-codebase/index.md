@@ -241,7 +241,7 @@ Uma estratégia melhor seria implementar essas construções no próprio objeto 
               GlobalizationConstants.ApiNaoPossuiCenariosParaCertificacao.Resource(),
               GlobalizationConstants.MensagemPadraoErroLoremIpsum.Resource());
 
-          if (!await scenariosApiAsync)
+          if (!await developerCredentialsAsync)
             return CreateResponseInternal(
               StatusOperacaoConstants.DEV_NOT_CREDENTIALS,
               GlobalizationConstants.DesenvolvedorNaoPossuiCredenciais.Resource(),
