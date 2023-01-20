@@ -13,7 +13,7 @@ categories = [
 image = "linh-ha-KN8W0Q8H3gI-unsplash.jpg"
 +++
 
-Quando atuamos em sistemas complexos facilmente percebemos a quantidade de pessoas que atuaram apenas observando os estilos de codificação (inclusive os mais peculiares). Cada pessoa possuis suas habilidades e experiências, e isso influencia diretamente em como o código é escrito. Uma das estratégias para minimizar esse impacto é reduzir ao máximo a complexidade cognitiva.
+Quando atuamos em sistemas complexos facilmente percebemos a quantidade de pessoas que atuaram apenas observando os estilos de codificação (inclusive os mais peculiares). Cada pessoa possui suas habilidades e experiências, e isso influencia diretamente em como o código é escrito. Uma das estratégias para minimizar esse impacto é reduzir ao máximo a complexidade cognitiva.
 
 
 ## Bloco de exemplo
