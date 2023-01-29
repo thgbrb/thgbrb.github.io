@@ -2,7 +2,7 @@
 author = "Thiago Borba"
 title = "Comparando Task eliding e non-eliding"
 slug = "task-eliding-vs-noneliding"
-date = "2022-12-29"
+date = "2023-01-07"
 description = "Eliding task é uma técnica de otimização que atrasa o unwrap de uma Task e reduz a alocação de memória. Faz sentido sempre utilizar essa técnica?"
 tags = [
 "Performance",
