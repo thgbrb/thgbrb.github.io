@@ -2,7 +2,7 @@
 title: "Low Level"
 description: "Escovação de bits"
 slug: "lowlevel"
-image: "louis-reed-MaDXpqp1vM0-unsplash.jpg"
+image: "1.jpg"
 style:
     background: "#2a9d8f"
     color: "#fff"

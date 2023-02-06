@@ -8,7 +8,7 @@ tags = [
 "Dica",
 ]
 categories = [
-"infraestrutura",
+"Infrastructure",
 ]
 image = "pablo-arroyo-_SEbdtH4ZLM-unsplash.jpg"
 +++
