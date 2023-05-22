@@ -71,6 +71,12 @@ volumes:
 ### WSL2 - Inicializar serviços no startup do wsl
 
 ```bash
+# Enable systemd
+
+echo -e "[boot]\nsystemd=true" | sudo tee /etc/wsl.conf
+```
+
+```bash
 # vim /etc/wsl.conf
 
 [boot]
