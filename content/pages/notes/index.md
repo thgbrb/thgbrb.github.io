@@ -94,3 +94,18 @@ Start-ADSyncSyncCycle -PolicyType Delta
 # Start-ADSyncSyncCycle -PolicyType Initial
 ```
 
+### Tasmota Zigbee Hub
+- 12.5.0(tasmota)
+- ESP 5741884 (ESP32-D0WD-V3 rev.3)
+
+console
+```
+// Habilita Ntp Server
+time 0
+
+// Habilita MQTT
+SetOption3 1
+
+// Configura topic mqtt único por dispositivo
+SetOption89 1
+```
