@@ -3,7 +3,7 @@
 
 <div id="vssue"></div>
 
-<script src="https://unpkg.com/vue/dist/vue.runtime.min.js"></script>
+<script src="https://unpkg.com/vue@2/dist/vue.runtime.min.js"></script>
 <script src="https://unpkg.com/vssue/dist/vssue.{{ .platform }}.min.js"></script>
 
 <script>
@@ -14,7 +14,7 @@
                 props: {
                     title: "{{ $.Title }}",
                     options: {
-                        proxy: (url) => "https://cors-anywhere.azm.workers.dev/" + url,
+                        autoCreateIssue: {{ default false .autoCreateIssue }},
                         owner: "{{ .owner }}",
                         repo: "{{ .repo }}",
                         clientId: "{{ .clientId }}",

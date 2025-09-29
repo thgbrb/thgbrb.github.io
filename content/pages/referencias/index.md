@@ -11,7 +11,8 @@ lastmod: '2021-07-22'
 menu:
     main: 
         weight: -60
-        pre: book
+        params:
+            icon: book
 image: referencias.jpeg
 ---
 

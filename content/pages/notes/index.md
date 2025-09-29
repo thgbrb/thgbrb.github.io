@@ -11,7 +11,8 @@ lastmod: '2022-04-22'
 menu:
     main: 
         weight: -60
-        pre: book
+        params:
+            icon: book
 image: photo-1533279443086-d1c19a186416.jpg
 ---
 

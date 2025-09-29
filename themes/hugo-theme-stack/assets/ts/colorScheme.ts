@@ -8,6 +8,10 @@ class StackColorScheme {
     constructor(toggleEl: HTMLElement) {
         this.bindMatchMedia();
         this.currentScheme = this.getSavedScheme();
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches === true)
+            this.systemPreferScheme = 'dark'
+        else
+            this.systemPreferScheme = 'light';
 
         this.dispatchEvent(document.documentElement.dataset.scheme as colorScheme);
 
@@ -22,7 +26,7 @@ class StackColorScheme {
         localStorage.setItem(this.localStorageKey, this.currentScheme);
     }
 
-    private bindClick(toggleEl) {
+    private bindClick(toggleEl: HTMLElement) {
         toggleEl.addEventListener('click', (e) => {
             if (this.isDark()) {
                 /// Disable dark mode

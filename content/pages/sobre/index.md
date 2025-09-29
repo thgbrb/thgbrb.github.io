@@ -12,7 +12,8 @@ lastmod: '2021-07-05'
 menu:
     main: 
         weight: -90
-        pre: user
+        params:
+            icon: user
 image: thiago-borba-WYb1idY-Ilw-unsplash.jpg
 ---
 

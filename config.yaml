@@ -1,20 +1,25 @@
-baseurl: https://joganacontadainfra.com.br
+baseURL: https://joganacontadainfra.com.br
 languageCode: pt-br
 theme: hugo-theme-stack
-paginate: 5
+pagination:
+    pagerSize: 5
 title: λ JogaNaContaDaInfra
 
 # Change it to your Disqus shortname before using
 disqusShortname: thiagoborba-me
 
-# GA Tracking ID
-googleAnalytics: UA-145438397-1
+# GA4 Tracking ID (upgraded from Universal Analytics)
+googleAnalytics: G-XXXXXXXXXX
 
 # Theme i18n support
 # Available values: en, fr, id, ja, ko, pt-br, zh-cn, es, de, nl
-DefaultContentLanguage: pt-br   
+defaultContentLanguage: pt-br   
 
+# Build configuration
 timeout: 60000
+build:
+  writeStats: true
+  useResourceCacheWhen: fallback
 
 permalinks:
     post: /p/:slug/
@@ -131,7 +136,8 @@ menu:
           name: Home
           url: /
           weight: -100
-          pre: home
+          params:
+            icon: home
 
 related:
     includeNewer: true
@@ -140,9 +146,80 @@ related:
     indices:
         - name: tags
           weight: 100
-
         - name: categories
           weight: 200
+
+# Modern Hugo features
+minify:
+    disableXML: true
+    minifyOutput: true
+    tdewolff:
+        css:
+            keepCSS2: true
+        html:
+            keepConditionalComments: true
+            keepDefaultAttrVals: true
+            keepDocumentTags: true
+            keepEndTags: true
+            keepQuotes: true
+            keepWhitespace: false
+        js:
+            keepVarNames: true
+            version: 2022
+        json:
+            keepNumbers: true
+        svg:
+            keepComments: true
+        xml:
+            keepWhitespace: false
+
+# Performance optimizations
+imaging:
+    resampleFilter: Lanczos
+    quality: 75
+    anchor: Smart
+
+# Security headers
+security:
+    func:
+        getenv:
+            - ^HUGO_
+        toCSS:
+            - ^https?://
+        toJS:
+            - ^https?://
+
+# Output formats
+outputs:
+    home:
+        - HTML
+        - RSS
+    page:
+        - HTML
+    section:
+        - HTML
+        - RSS
+
+# Taxonomies
+taxonomies:
+    category: categories
+    tag: tags
+    series: series
+
+# Caching
+caches:
+    assets:
+        dir: :resourceDir/_gen
+        maxAge: -1
+    images:
+        dir: :resourceDir/_gen/images
+        maxAge: -1
+    getjson:
+        dir: :cacheDir
+        maxAge: -1
+    getcsv:
+        dir: :cacheDir
+        maxAge: -1
 
 markup:
     tableOfContents:
@@ -151,6 +228,25 @@ markup:
         startLevel: 2
     highlight:
         noClasses: false
+        codeFences: true
+        guessSyntax: true
+        lineNos: true
+        style: github
+        tabWidth: 4
     goldmark:
         renderer:
             unsafe: true
+        extensions:
+            typographer:
+                enable: true
+            linkify: true
+            table: true
+            strikethrough: true
+            taskList: true
+    asciidocExt:
+        workingFolderCurrent: true
+        preserveTOC: true
+    blackfriday:
+        hrefTargetBlank: true
+        noreferrerLinks: true
+        nofollowLinks: true
