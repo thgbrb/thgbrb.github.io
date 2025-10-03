@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Dica on λ JogaNaContaDaInfra</title>
+        <link>https://joganacontadainfra.com.br/tags/dica/</link>
+        <description>Recent content in Dica on λ JogaNaContaDaInfra</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>pt-br</language>
+        <lastBuildDate>Sat, 28 Jan 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://joganacontadainfra.com.br/tags/dica/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Ingress-as-a-Service - Exposição de serviços locais</title>
+        <link>https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/</link>
+        <pubDate>Sat, 28 Jan 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/</guid>
+        <description>&lt;img src="https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/pablo-arroyo-_SEbdtH4ZLM-unsplash.jpg" alt="Featured image of post Ingress-as-a-Service - Exposição de serviços locais" /&gt;&lt;p&gt;A facilidade do uso das clouds permite que em poucos minutos uma aplicação esteja disponível e publicada, porém demanda um esforço para que isso aconteça. Esse esforço envolve normalmente o provisionamento de ambientes e a sua publicação a cada alteração.
+Uma alternativa para exposição de serviços é rotear o acesso diretamente para a aplicação local. Essa estratégia elimina a necessidade de publicações para testes e /ou validações. Sem o uso de ferramentas esse processo tende a ser demorado, manual e pouco eficiente.&lt;/p&gt;
+&lt;h2 id=&#34;ngrok---ingress-as-a-service&#34;&gt;Ngrok - Ingress-as-a-Service
+&lt;/h2&gt;&lt;p&gt;O &lt;a class=&#34;link&#34; href=&#34;https://ngrok.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Ngrok&lt;/a&gt; é uma ferramenta super esperta que, através da utilização de um agente local, permite redirecionar todo o tráfego de uma DNS temporãrio para uma porta local específica.
+Isso significa, que toda a requisição feita para esse DNS temporário é redirecionada para a porta local do seu dispositivo.&lt;/p&gt;
+&lt;h2 id=&#34;webhook&#34;&gt;Webhook
+&lt;/h2&gt;&lt;p&gt;Durante a integração como o webhook do Azure DevOps foi necessário expor uma URL válida para receber os eventos do Azure DevOps. Para agilizar o processo do laboratório inicial, utilizei um DNS temporário criado pelo ngrok para que a aplicação rodando localmente fosse sensibilizada.&lt;/p&gt;
+&lt;p&gt;Para ser sensibilizado pelo webhook do Azure DevOps coloquei a aplicação para executar localmente na porta 5084.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;info: Microsoft.Hosting.Lifetime[14]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      Now listening on: http://localhost:5084
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Uma vez que o ngrok está instalado com sua chave de api configurada, basta executar o agente para criar o DNS temporário e iniciar o redirecionamento.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ngrok http &lt;span class=&#34;m&#34;&gt;5084&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/assets/2023-01-29-16-07-43.png&#34;
+	width=&#34;866&#34;
+	height=&#34;291&#34;
+	srcset=&#34;https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/assets/2023-01-29-16-07-43_hu_359f0f9c764c6df.png 480w, https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/assets/2023-01-29-16-07-43_hu_548d6aa663a785ed.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;297&#34;
+		data-flex-basis=&#34;714px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Em alguns segundos o redirecionamento está concluído.&lt;/p&gt;
+&lt;p&gt;No teste abaixo, observamos que a requisição de teste feita pelo painel de service hook do Azure DevOps é recebida diretamente na aplicação que está rodando localmente em modo debug.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/assets/2023-01-29-16-11-59.png&#34;
+	width=&#34;619&#34;
+	height=&#34;424&#34;
+	srcset=&#34;https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/assets/2023-01-29-16-11-59_hu_475179cb7e2b6644.png 480w, https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/assets/2023-01-29-16-11-59_hu_57e04f20d41badfe.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;145&#34;
+		data-flex-basis=&#34;350px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/assets/2023-01-29-16-11-31.png&#34;
+	width=&#34;880&#34;
+	height=&#34;195&#34;
+	srcset=&#34;https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/assets/2023-01-29-16-11-31_hu_7233463cc5796a12.png 480w, https://joganacontadainfra.com.br/p/ngrok-dns-publico-temporario/assets/2023-01-29-16-11-31_hu_4d4ec4f289a7be0a.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;451&#34;
+		data-flex-basis=&#34;1083px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h2 id=&#34;conclusão&#34;&gt;Conclusão
+&lt;/h2&gt;&lt;p&gt;Em cenários de laboratórios, testes ou integrações rápidas a estratégia com o ngrok é uma excelente alternativa para evitar o investimento de tempo e energia em itens de infraestrutura que estejam fora do escopo. O ngrok está disponível para Windows, Mac e Linux e a sua licença free permite a criação de um redirecionamento.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;👉 Dica ☠️&lt;/p&gt;
+&lt;p&gt;A instalação do ngrok está disponível nos principais gerenciadores de pacotes.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;brew install ngrok/ngrok/ngrok&lt;/li&gt;
+&lt;li&gt;choco install ngrok&lt;/li&gt;
+&lt;li&gt;snap install ngrok&lt;/li&gt;
+&lt;/ul&gt;&lt;/blockquote&gt;
+</description>
+        </item>
+        <item>
+        <title>Sonarlint</title>
+        <link>https://joganacontadainfra.com.br/p/sonarlint/</link>
+        <pubDate>Thu, 21 Apr 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://joganacontadainfra.com.br/p/sonarlint/</guid>
+        <description>&lt;img src="https://joganacontadainfra.com.br/p/sonarlint/photo-1634128221889-82ed6efebfc3.jpg" alt="Featured image of post Sonarlint" /&gt;&lt;h2 id=&#34;sonarlint&#34;&gt;Sonarlint
+&lt;/h2&gt;&lt;p&gt;O sonarlint é uma extensão free e opensource para as principais IDEs do mercado que ajuda a corrigir bugs no código, aumentar a qualidade e detectar falhas de segurança. O Sonarlint faz a análise estática do código, seja de um único arquivo ou de toda uma solução.&lt;/p&gt;
+&lt;p&gt;&lt;video autoplay loop muted playsinline src=&#34;index.assets/index-video.mp4&#34; width=&#34;100%&#34; height=&#34;100%&#34;&gt;&lt;/video&gt;&lt;/p&gt;
+&lt;p&gt;O Sonarlint entrega algumas centenas de regras específicas para cada tipo de linguagem suportada. Essas regras detectam bugs, code smell e vunerabilidades que podem ser introduzidas em tempo de codificação. O feedback é instantâneo!&lt;/p&gt;
+&lt;h2 id=&#34;conexão-com-sonarqube-ou-sonarcloud&#34;&gt;Conexão com SonarQube ou SonarCloud
+&lt;/h2&gt;&lt;p&gt;O Sonarlint pode ser conectado a instâncias do SonarQube ou SonarCloud. Essa configuração permite receber as notificações de quality gates diretamente na IDE. Essa conexão também importa as regras de quality gates definidas no SonarQube/SonarCloud do projeto e/ou de uma linguagem, ou seja, após a conexão as regras passagem a ser analisadas diratemente na IDE. Além do aumenta da qualidade de código e conhecimento, ambos citados acima, &lt;strong&gt;essa integração permite ter o feedback do quality gate sem a necessidade da análise da esteira de integração contínua&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://joganacontadainfra.com.br/p/sonarlint/index.assets/image-20220422170630591.png&#34;
+	width=&#34;1572&#34;
+	height=&#34;610&#34;
+	srcset=&#34;https://joganacontadainfra.com.br/p/sonarlint/index.assets/image-20220422170630591_hu_6389744d9c71df56.png 480w, https://joganacontadainfra.com.br/p/sonarlint/index.assets/image-20220422170630591_hu_f36020c20c9fcf4b.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Configuração da integração com o SonarQube/SonarCloud&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;257&#34;
+		data-flex-basis=&#34;618px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h2 id=&#34;links-e-referências&#34;&gt;Links e referências
+&lt;/h2&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Ferramenta&lt;/th&gt;
+          &lt;th&gt;Referência&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Sonarlint&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.sonarlint.org&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.sonarlint.org&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Extensão para Jetbrains&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;https://plugins.jetbrains.com/plugin/7973-sonarlint#Jetbrains&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://plugins.jetbrains.com/plugin/7973-sonarlint#Jetbrains&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Extensão para Visual Studio 2022&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;https://marketplace.visualstudio.com/items?itemName=SonarSource.SonarLintforVisualStudio2022&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://marketplace.visualstudio.com/items?itemName=SonarSource.SonarLintforVisualStudio2022&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Extensão para Visual Studio 2019&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;https://marketplace.visualstudio.com/items?itemName=SonarSource.SonarLintforVisualStudio2019&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://marketplace.visualstudio.com/items?itemName=SonarSource.SonarLintforVisualStudio2019&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Extensão para Visual Studio 2017&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;https://marketplace.visualstudio.com/items?itemName=SonarSource.SonarLintforVisualStudio2017&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://marketplace.visualstudio.com/items?itemName=SonarSource.SonarLintforVisualStudio2017&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Extensão para Visual Studio Code&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarlint-vscode&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarlint-vscode&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Extensão para Eclipse&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;https://marketplace.eclipse.org/content/sonarlint&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://marketplace.eclipse.org/content/sonarlint&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
